@@ -7,6 +7,8 @@ use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\SystemController;
 
 // Página inicial
 Route::get('/', function () {
@@ -21,6 +23,27 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Rotas protegidas por autenticação
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Rotas para usuários
+    Route::resource('users', UserController::class);
+    Route::patch('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
+    Route::patch('/users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
+    Route::patch('/users/{user}/permissions', [UserController::class, 'updatePermissions'])->name('users.permissions');
+    Route::get('/api/users', [UserController::class, 'apiIndex'])->name('users.api');
+
+    // Rotas para sistema
+    Route::prefix('system')->name('system.')->group(function () {
+        Route::get('/dashboard', [SystemController::class, 'dashboard'])->name('dashboard');
+        Route::get('/settings', [SystemController::class, 'settings'])->name('settings');
+        Route::get('/logs', [SystemController::class, 'logs'])->name('logs');
+        Route::get('/info', [SystemController::class, 'info'])->name('info');
+        Route::post('/backup', [SystemController::class, 'backup'])->name('backup');
+        Route::get('/backups', [SystemController::class, 'listBackups'])->name('backups');
+        Route::get('/backups/{filename}/download', [SystemController::class, 'downloadBackup'])->name('backups.download');
+        Route::delete('/backups/{filename}', [SystemController::class, 'deleteBackup'])->name('backups.delete');
+        Route::post('/cache/clear', [SystemController::class, 'clearCache'])->name('cache.clear');
+        Route::match(['get', 'post'], '/maintenance', [SystemController::class, 'maintenance'])->name('maintenance');
+    });
 
     // Rotas para escolas
     Route::resource('schools', SchoolController::class);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use App\Models\ActivityLog;
 
 class AuthController extends Controller
 {
@@ -28,6 +29,13 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
+            // Atualizar informações de login
+            $user = Auth::user();
+            $user->updateLastLogin($request->ip());
+
+            // Log da atividade
+            ActivityLog::log('login', 'User', "Usuário {$user->name} fez login", $user->id);
 
             return redirect()->intended('/dashboard');
         }

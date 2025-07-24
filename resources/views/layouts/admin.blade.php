@@ -342,6 +342,60 @@
             color: var(--gray-600);
         }
 
+        /* Dropdown Styles */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0.5rem 0;
+            min-width: 280px;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-header {
+            padding: 1rem 1.5rem 0.5rem;
+            background: linear-gradient(135deg, #004AAD 0%, #0066cc 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            margin: -0.5rem 0 0.5rem;
+        }
+
+        .dropdown-header .profile-img {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            padding-left: 2rem;
+            transform: translateX(5px);
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: #fee;
+            color: #dc3545 !important;
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            opacity: 0.2;
+        }
+
         /* Panel Content */
         .panel-content {
             padding: 2rem;
@@ -515,14 +569,66 @@
                             <span class="notification-badge">3</span>
                         </button>
                     </div>
-                    <div class="header-profile">
-                        <button class="profile-btn">
+                    <div class="header-profile dropdown">
+                        <button class="profile-btn dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="profile-img">
                                 <i class="fas fa-user-circle"></i>
                             </div>
                             <span>{{ Auth::user()->name }}</span>
                             <i class="fas fa-chevron-down"></i>
                         </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li>
+                                <div class="dropdown-header">
+                                    <div class="d-flex align-items-center">
+                                        <div class="profile-img me-2">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ Auth::user()->name }}</div>
+                                            <small class="text-muted">{{ Auth::user()->role_name }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('users.edit', Auth::id()) }}">
+                                    <i class="fas fa-user-edit me-2"></i>
+                                    Editar Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('users.show', Auth::id()) }}">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Ver Perfil
+                                </a>
+                            </li>
+                            @if(Auth::user()->isAdmin())
+                            <li>
+                                <a class="dropdown-item" href="{{ route('system.dashboard') }}">
+                                    <i class="fas fa-cogs me-2"></i>
+                                    Administração
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('users.index') }}">
+                                    <i class="fas fa-users me-2"></i>
+                                    Gerenciar Usuários
+                                </a>
+                            </li>
+                            @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>
+                                        Sair
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
