@@ -698,7 +698,7 @@ class CertificateController extends Controller
         try {
             // Determinar URL do microserviço baseado no ambiente
             $pdfServiceUrl = $this->getPdfServiceUrl();
-            
+
             // Log para debug
             Log::info('Enviando HTML para Node.js PDF service', [
                 'html_length' => strlen($html),
@@ -728,7 +728,7 @@ class CertificateController extends Controller
             }
 
             $result = $response->json();
-            
+
             if (!isset($result['success']) || !$result['success']) {
                 throw new \Exception('PDF generation failed: ' . ($result['message'] ?? 'Unknown error'));
             }
@@ -746,13 +746,13 @@ class CertificateController extends Controller
             Storage::disk('public')->put($fileName, $pdfContent);
 
             $certificate->update(['pdf_path' => $fileName]);
-            
+
             Log::info('Node.js PDF generated successfully', [
                 'file_name' => $fileName,
                 'certificate_id' => $certificate->id,
                 'service_url' => $pdfServiceUrl
             ]);
-            
+
             return $fileName;
 
         } catch (\Exception $e) {
@@ -761,7 +761,7 @@ class CertificateController extends Controller
                 'certificate_id' => $certificate->id,
                 'service_url' => $pdfServiceUrl ?? 'unknown'
             ]);
-            
+
             // Fallback para mPDF
             return $this->generatePreviewStylePDF($certificate);
         }
@@ -780,7 +780,7 @@ class CertificateController extends Controller
 
         // Detectar ambiente baseado na URL da aplicação
         $appUrl = config('app.url');
-        
+
         if (str_contains($appUrl, 'localhost') || str_contains($appUrl, '127.0.0.1')) {
             // Desenvolvimento local
             return 'http://localhost:3001';
