@@ -520,12 +520,24 @@ class CertificateController extends Controller
             $mpdf = new Mpdf([
                 'mode' => 'utf-8',
                 'format' => 'A4-L', // A4 Landscape
-                'margin_left' => 10,
-                'margin_right' => 10,
-                'margin_top' => 10,
-                'margin_bottom' => 10,
-                'default_font' => 'arial'
+                'margin_left' => 8,
+                'margin_right' => 8,
+                'margin_top' => 8,
+                'margin_bottom' => 8,
+                'default_font' => 'arial',
+                'debug' => false,
+                'allow_charset_conversion' => true,
+                'use_kwt' => true,
+                'autoPageBreak' => false, // Desabilita quebra automática de página
+                'keep_table_proportions' => true,
+                'shrink_tables_to_fit' => 1, // Ajusta tabelas para caber na página
+                'use_active_forms' => false
             ]);
+
+            // Configurações adicionais para forçar uma única página
+            $mpdf->shrink_tables_to_fit = 1;
+            $mpdf->keep_table_proportions = true;
+            $mpdf->autoPageBreak = false;
 
             // Definir metadados
             $mpdf->SetTitle('Certificado de Conclusão');
