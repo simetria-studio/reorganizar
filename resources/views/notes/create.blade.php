@@ -218,6 +218,12 @@
                                             @error('grade')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
+                                            <div id="grade-conversion-info" class="mt-2" style="display: none;">
+                                                <div class="alert alert-info py-2 px-3 mb-0" role="alert">
+                                                    <i class="fas fa-magic me-1"></i>
+                                                    <span id="conversion-message"></span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -316,25 +322,78 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Calcular percentual automaticamente
-    function calculatePercentage() {
-        const grade = parseFloat(document.getElementById('grade').value) || 0;
-        const maxGrade = parseFloat(document.getElementById('max_grade').value) || 0;
+    const gradeInput = document.getElementById('grade');
+    const maxGradeInput = document.getElementById('max_grade');
+    const percentageInput = document.getElementById('percentage');
+    const conversionInfo = document.getElementById('grade-conversion-info');
+    const conversionMessage = document.getElementById('conversion-message');
+
+    // Função para converter nota se necessário
+    function convertGradeIfNeeded(grade, maxGrade) {
+        const originalGrade = grade;
+        let convertedGrade = grade;
+        let message = null;
+
+        if (grade > maxGrade) {
+            let attempts = 0;
+            const maxAttempts = 3;
+
+            while (convertedGrade > maxGrade && attempts < maxAttempts) {
+                convertedGrade = convertedGrade / 10;
+                attempts++;
+            }
+
+            if (convertedGrade > maxGrade) {
+                convertedGrade = maxGrade;
+                message = `A nota será ajustada de ${originalGrade} para ${convertedGrade.toFixed(2)} (nota máxima)`;
+            } else {
+                message = `A nota será convertida de ${originalGrade} para ${convertedGrade.toFixed(2)}`;
+            }
+        }
+
+        return {
+            grade: Math.round(convertedGrade * 100) / 100,
+            message: message
+        };
+    }
+
+    // Calcular percentual e mostrar conversão
+    function calculatePercentageAndShowConversion() {
+        const grade = parseFloat(gradeInput.value) || 0;
+        const maxGrade = parseFloat(maxGradeInput.value) || 0;
 
         if (maxGrade > 0) {
-            const percentage = (grade / maxGrade * 100).toFixed(1);
-            document.getElementById('percentage').value = percentage + '%';
+            // Verificar se precisa converter
+            const conversion = convertGradeIfNeeded(grade, maxGrade);
+
+            if (conversion.message) {
+                // Mostrar informação de conversão
+                conversionMessage.textContent = conversion.message;
+                conversionInfo.style.display = 'block';
+
+                // Calcular percentual com a nota convertida
+                const percentage = (conversion.grade / maxGrade * 100).toFixed(1);
+                percentageInput.value = percentage + '%';
+            } else {
+                // Esconder informação de conversão
+                conversionInfo.style.display = 'none';
+
+                // Calcular percentual normal
+                const percentage = (grade / maxGrade * 100).toFixed(1);
+                percentageInput.value = percentage + '%';
+            }
         } else {
-            document.getElementById('percentage').value = '0%';
+            conversionInfo.style.display = 'none';
+            percentageInput.value = '0%';
         }
     }
 
-    // Adicionar eventos para calcular percentual
-    document.getElementById('grade').addEventListener('input', calculatePercentage);
-    document.getElementById('max_grade').addEventListener('input', calculatePercentage);
+    // Adicionar eventos
+    gradeInput.addEventListener('input', calculatePercentageAndShowConversion);
+    maxGradeInput.addEventListener('input', calculatePercentageAndShowConversion);
 
     // Calcular percentual inicial se houver valores
-    calculatePercentage();
+    calculatePercentageAndShowConversion();
 
     // Buscar dados do aluno quando selecionado
     document.getElementById('student_id').addEventListener('change', function() {
@@ -345,17 +404,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Validação de notas
-    document.getElementById('grade').addEventListener('blur', function() {
-        const grade = parseFloat(this.value);
-        const maxGrade = parseFloat(document.getElementById('max_grade').value);
-
-        if (grade > maxGrade) {
-            alert('A nota obtida não pode ser maior que a nota máxima!');
-            this.focus();
-        }
-    });
-
     // Formatação de números
     const numberInputs = document.querySelectorAll('input[type="number"]');
     numberInputs.forEach(input => {
@@ -363,10 +411,36 @@ document.addEventListener('DOMContentLoaded', function() {
             input.addEventListener('blur', function() {
                 if (this.value) {
                     this.value = parseFloat(this.value).toFixed(2);
+                    // Recalcular após formatação
+                    if (this.id === 'grade' || this.id === 'max_grade') {
+                        calculatePercentageAndShowConversion();
+                    }
                 }
             });
         }
     });
+
+    // Animação suave para mostrar/esconder o alerta de conversão
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const target = mutation.target;
+                if (target.id === 'grade-conversion-info') {
+                    if (target.style.display === 'block') {
+                        target.style.opacity = '0';
+                        target.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            target.style.transition = 'all 0.3s ease';
+                            target.style.opacity = '1';
+                            target.style.transform = 'translateY(0)';
+                        }, 10);
+                    }
+                }
+            }
+        });
+    });
+
+    observer.observe(conversionInfo, { attributes: true });
 });
 </script>
 @endpush

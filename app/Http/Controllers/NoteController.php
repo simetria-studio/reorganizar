@@ -178,12 +178,10 @@ class NoteController extends Controller
             'weight.min' => 'O peso deve ser maior que zero.',
         ]);
 
-        // Validação customizada: nota não pode ser maior que nota máxima
-        if ($validated['grade'] > $validated['max_grade']) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['grade' => 'A nota não pode ser maior que a nota máxima.']);
-        }
+        // Conversão automática de nota se necessário
+        $gradeConversion = $this->convertGradeIfNeeded($validated['grade'], $validated['max_grade']);
+        $validated['grade'] = $gradeConversion['grade'];
+        $conversionMessage = $gradeConversion['message'];
 
         try {
             DB::beginTransaction();
@@ -195,8 +193,13 @@ class NoteController extends Controller
 
             DB::commit();
 
+            $successMessage = 'Nota cadastrada com sucesso!';
+            if ($conversionMessage) {
+                $successMessage .= ' ' . $conversionMessage;
+            }
+
             return redirect()->route('notes.show', $note)
-                ->with('success', 'Nota cadastrada com sucesso!');
+                ->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -291,12 +294,10 @@ class NoteController extends Controller
             'status.in' => 'Status inválido.',
         ]);
 
-        // Validação customizada: nota não pode ser maior que nota máxima
-        if ($validated['grade'] > $validated['max_grade']) {
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['grade' => 'A nota não pode ser maior que a nota máxima.']);
-        }
+        // Conversão automática de nota se necessário
+        $gradeConversion = $this->convertGradeIfNeeded($validated['grade'], $validated['max_grade']);
+        $validated['grade'] = $gradeConversion['grade'];
+        $conversionMessage = $gradeConversion['message'];
 
         try {
             DB::beginTransaction();
@@ -308,8 +309,13 @@ class NoteController extends Controller
 
             DB::commit();
 
+            $successMessage = 'Nota atualizada com sucesso!';
+            if ($conversionMessage) {
+                $successMessage .= ' ' . $conversionMessage;
+            }
+
             return redirect()->route('notes.show', $note)
-                ->with('success', 'Nota atualizada com sucesso!');
+                ->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -570,5 +576,39 @@ class NoteController extends Controller
             ->get(['id', 'name', 'enrollment']);
 
         return response()->json($students);
+    }
+
+    /**
+     * Converte automaticamente a nota se ela for maior que a nota máxima
+     */
+    private function convertGradeIfNeeded($grade, $maxGrade)
+    {
+        $originalGrade = $grade;
+        $message = null;
+
+        // Se a nota for maior que a máxima, tentar conversão automática
+        if ($grade > $maxGrade) {
+            // Dividir por 10 até a nota ficar dentro do limite ou até 3 tentativas
+            $attempts = 0;
+            $maxAttempts = 3;
+
+            while ($grade > $maxGrade && $attempts < $maxAttempts) {
+                $grade = $grade / 10;
+                $attempts++;
+            }
+
+            // Se ainda estiver acima do limite após tentativas, usar a nota máxima
+            if ($grade > $maxGrade) {
+                $grade = $maxGrade;
+                $message = "⚠️ A nota foi ajustada automaticamente de {$originalGrade} para {$grade} (nota máxima permitida).";
+            } else {
+                $message = "✨ A nota foi convertida automaticamente de {$originalGrade} para {$grade}.";
+            }
+        }
+
+        return [
+            'grade' => round($grade, 2),
+            'message' => $message
+        ];
     }
 }

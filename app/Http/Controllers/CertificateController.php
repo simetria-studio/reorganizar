@@ -12,6 +12,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Browsershot\Browsershot;
+use Mpdf\Mpdf;
 
 class CertificateController extends Controller
 {
@@ -380,9 +382,9 @@ class CertificateController extends Controller
     }
 
     /**
-     * Generate certificate PDF
+     * Generate certificate PDF using Browsershot (Better quality)
      */
-    public function generatePDF(Certificate $certificate)
+    public function generateBrowsershotPDF(Certificate $certificate)
     {
         $certificate->load(['student', 'school']);
 
@@ -422,6 +424,197 @@ class CertificateController extends Controller
             'school_type' => 'Centro Estadual de Tempo Integral - CETI',
             'school_short_name' => 'FRANCISCA TRINDADE',
             'authorization' => $certificate->school_authorization ?? '224/2022',
+            'authorization_date' => '02/12/2022'
+        ];
+
+        // Passar tanto os dados individuais quanto o objeto certificate
+        $data['certificate'] = $certificate;
+
+        // Gerar HTML
+        $html = view('certificates.pdf', $data)->render();
+
+        try {
+            // Gerar PDF com Browsershot
+            $pdf = Browsershot::html($html)
+                ->paperSize(297, 210) // A4 Landscape em mm
+                ->margins(0, 0, 0, 0)
+                ->showBackground()
+                ->waitUntilNetworkIdle()
+                ->pdf();
+
+            // Criar diretório se não existir
+            $directory = 'certificates/' . date('Y');
+            if (!Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory);
+            }
+
+            // Salvar PDF
+            $fileName = $directory . "/certificado_browsershot_{$certificate->certificate_number}.pdf";
+            Storage::disk('public')->put($fileName, $pdf);
+
+            // Atualizar caminho no banco
+            $certificate->update(['pdf_path' => $fileName]);
+
+            return $fileName;
+
+        } catch (\Exception $e) {
+            // Fallback para DomPDF se Browsershot falhar
+            return $this->generatePDFWithDomPDF($certificate);
+        }
+    }
+
+    /**
+     * Generate certificate PDF using mPDF (Better quality, no external dependencies)
+     */
+    public function generateMPDF(Certificate $certificate)
+    {
+        $certificate->load(['student', 'school']);
+
+        // Array de meses em português
+        $months = [
+            1 => 'JANEIRO', 2 => 'FEVEREIRO', 3 => 'MARÇO', 4 => 'ABRIL',
+            5 => 'MAIO', 6 => 'JUNHO', 7 => 'JULHO', 8 => 'AGOSTO',
+            9 => 'SETEMBRO', 10 => 'OUTUBRO', 11 => 'NOVEMBRO', 12 => 'DEZEMBRO'
+        ];
+
+        // Preparar dados para o template
+        $data = [
+            'school_name' => $certificate->school_name,
+            'school_cnpj' => $certificate->formatted_school_cnpj,
+            'school_inep' => $certificate->school_inep,
+            'school_address' => $certificate->school_address,
+            'school_authorization' => $certificate->school_authorization,
+            'authorization_date' => $certificate->authorization_date ?? '02/12/2022',
+            'student_name' => $certificate->student_name,
+            'student_cpf' => $certificate->formatted_student_cpf,
+            'student_birth_day' => $certificate->student_birth_date ? $certificate->student_birth_date->format('d') : '30',
+            'student_birth_month' => $certificate->student_birth_date_written,
+            'student_birth_year' => $certificate->student_birth_date ? $certificate->student_birth_date->format('Y') : '2006',
+            'student_birthplace' => $certificate->student_birth_place,
+            'student_birth_state' => 'PIAUÍ',
+            'student_nationality' => $certificate->student_nationality,
+            'student_father' => $certificate->father_name,
+            'student_mother' => $certificate->mother_name,
+            'completion_year' => $certificate->completion_year,
+            'course_level' => $certificate->course_level_label,
+            'issue_location' => $certificate->issue_city,
+            'issue_state' => $certificate->issue_state,
+            'issue_day' => $certificate->issue_date ? $certificate->issue_date->format('d') : '08',
+            'issue_month' => $certificate->issue_date ? $months[$certificate->issue_date->format('n')] : 'FEVEREIRO',
+            'issue_year' => $certificate->issue_date ? $certificate->issue_date->format('Y') : '2024',
+            'verification_code' => $certificate->verification_code,
+            'school_type' => 'Centro Estadual de Tempo Integral - CETI',
+            'school_short_name' => 'FRANCISCA TRINDADE',
+            'authorization' => $certificate->school_authorization ?? '224/2022',
+            'authorization_date' => '02/12/2022'
+        ];
+
+        // Passar tanto os dados individuais quanto o objeto certificate
+        $data['certificate'] = $certificate;
+
+        // Gerar HTML
+        $html = view('certificates.pdf-mpdf', $data)->render();
+
+        try {
+            // Configurar mPDF
+            $mpdf = new Mpdf([
+                'mode' => 'utf-8',
+                'format' => 'A4-L', // A4 Landscape
+                'margin_left' => 10,
+                'margin_right' => 10,
+                'margin_top' => 10,
+                'margin_bottom' => 10,
+                'default_font' => 'arial'
+            ]);
+
+            // Definir metadados
+            $mpdf->SetTitle('Certificado de Conclusão');
+            $mpdf->SetAuthor($certificate->school_name);
+
+            // Escrever HTML
+            $mpdf->WriteHTML($html);
+
+            // Gerar PDF
+            $pdfContent = $mpdf->Output('', 'S');
+
+            // Criar diretório se não existir
+            $directory = 'certificates/' . date('Y');
+            if (!Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory);
+            }
+
+            // Salvar PDF
+            $fileName = $directory . "/certificado_mpdf_{$certificate->certificate_number}.pdf";
+            Storage::disk('public')->put($fileName, $pdfContent);
+
+            // Atualizar caminho no banco
+            $certificate->update(['pdf_path' => $fileName]);
+
+            return $fileName;
+
+        } catch (\Exception $e) {
+            // Fallback para DomPDF se mPDF falhar
+            return $this->generatePDFWithDomPDF($certificate);
+        }
+    }
+
+    /**
+     * Generate certificate PDF
+     */
+    public function generatePDF(Certificate $certificate)
+    {
+        // Tentar usar mPDF primeiro (mais confiável)
+        try {
+            return $this->generateMPDF($certificate);
+        } catch (\Exception $e) {
+            // Fallback para DomPDF
+            return $this->generatePDFWithDomPDF($certificate);
+        }
+    }
+
+    /**
+     * Generate certificate PDF with DomPDF (Fallback)
+     */
+    public function generatePDFWithDomPDF(Certificate $certificate)
+    {
+        $certificate->load(['student', 'school']);
+
+        // Array de meses em português
+        $months = [
+            1 => 'JANEIRO', 2 => 'FEVEREIRO', 3 => 'MARÇO', 4 => 'ABRIL',
+            5 => 'MAIO', 6 => 'JUNHO', 7 => 'JULHO', 8 => 'AGOSTO',
+            9 => 'SETEMBRO', 10 => 'OUTUBRO', 11 => 'NOVEMBRO', 12 => 'DEZEMBRO'
+        ];
+
+        // Preparar dados para o template
+        $data = [
+            'school_name' => $certificate->school_name,
+            'school_cnpj' => $certificate->formatted_school_cnpj,
+            'school_inep' => $certificate->school_inep,
+            'school_address' => $certificate->school_address,
+            'school_authorization' => $certificate->school_authorization,
+            'authorization_date' => $certificate->authorization_date ?? '02/12/2022',
+            'student_name' => $certificate->student_name,
+            'student_cpf' => $certificate->formatted_student_cpf,
+            'student_birth_day' => $certificate->student_birth_date ? $certificate->student_birth_date->format('d') : '30',
+            'student_birth_month' => $certificate->student_birth_date_written ?? 'JULHO',
+            'student_birth_year' => $certificate->student_birth_date ? $certificate->student_birth_date->format('Y') : '2006',
+            'student_birthplace' => $certificate->student_birth_place ?? 'BARRAS',
+            'student_birth_state' => 'PIAUÍ',
+            'student_nationality' => $certificate->student_nationality ?? 'BRASILEIRA',
+            'student_father' => $certificate->father_name ?? 'FRANCISCO DAS CHAGAS FURTADO MACHADO',
+            'student_mother' => $certificate->mother_name ?? 'MARIA DA CONCEIÇÃO FERREIRA DA SILVA',
+            'completion_year' => $certificate->completion_year ?? '2023',
+            'course_level' => $certificate->course_level_label ?? 'MÉDIO',
+            'issue_location' => $certificate->issue_city ?? 'BARRAS',
+            'issue_state' => $certificate->issue_state ?? 'PI',
+            'issue_day' => $certificate->issue_date ? $certificate->issue_date->format('d') : '08',
+            'issue_month' => $certificate->issue_date ? $months[$certificate->issue_date->format('n')] : 'FEVEREIRO',
+            'issue_year' => $certificate->issue_date ? $certificate->issue_date->format('Y') : '2024',
+            'verification_code' => $certificate->verification_code ?? 'CERT-2024-12345',
+            'school_type' => 'Centro Estadual de Tempo Integral - CETI',
+            'school_short_name' => 'FRANCISCA TRINDADE',
+            'authorization' => '224/2022',
             'authorization_date' => '02/12/2022'
         ];
 

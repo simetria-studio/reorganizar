@@ -333,41 +333,228 @@
 @push('styles')
 <style>
 @media print {
-    .btn, .dropdown-toggle {
+    /* Ocultar elementos da interface administrativa */
+    .modern-sidebar,
+    .panel-header,
+    .btn,
+    .dropdown-toggle,
+    .breadcrumb,
+    .sidebar-toggle {
         display: none !important;
     }
 
-    .card {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-        page-break-inside: avoid;
+    /* Ajustar layout principal para impressão */
+    .main-panel {
+        margin-left: 0 !important;
+        width: 100% !important;
     }
 
+    .admin-panel {
+        display: block !important;
+    }
+
+    /* Garantir que o container seja visível */
+    .container-fluid {
+        padding: 0 !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Garantir que o conteúdo principal seja sempre visível */
+    .card,
+    .card-body,
+    .card-header {
+        display: block !important;
+        visibility: visible !important;
+        page-break-inside: avoid;
+        margin: 0 !important;
+    }
+
+    /* Cabeçalho oficial do histórico - SEMPRE visível */
+    .card-body > .text-center:first-child {
+        display: block !important;
+        visibility: visible !important;
+        margin-bottom: 20px !important;
+        border: 2px solid #000 !important;
+        padding: 15px !important;
+        page-break-after: avoid !important;
+    }
+
+    /* Títulos e cabeçalhos */
     .card-header {
         background-color: #f8f9fa !important;
         color: #000 !important;
         -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border-bottom: 1px solid #000 !important;
+        display: block !important;
+        visibility: visible !important;
     }
 
+    /* Ocultar apenas os botões do cabeçalho, manter título */
+    .card-header .btn,
+    .card-header .dropdown-toggle,
+    .card-header .d-flex .btn {
+        display: none !important;
+    }
+
+    .card-header h4,
+    .card-header h5 {
+        display: block !important;
+        visibility: visible !important;
+        color: #000 !important;
+    }
+
+    .card-body {
+        padding: 15px !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Dados pessoais e resumo - sempre visíveis */
+    .row,
+    .col-md-8,
+    .col-md-4,
+    .col-md-6,
+    .col-md-3 {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        float: none !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Ajustar resumo acadêmico para lado a lado */
+    .col-md-8 {
+        width: 65% !important;
+        float: left !important;
+        display: block !important;
+    }
+
+    .col-md-4 {
+        width: 33% !important;
+        float: right !important;
+        display: block !important;
+    }
+
+    /* Clearfix */
+    .row::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    /* Ajustes específicos para tabelas */
     .table {
-        font-size: 11px;
+        font-size: 11px !important;
+        border-collapse: collapse !important;
+        display: table !important;
+        visibility: visible !important;
+        width: 100% !important;
     }
 
+    .table th,
+    .table td {
+        border: 1px solid #000 !important;
+        padding: 4px 6px !important;
+        display: table-cell !important;
+        visibility: visible !important;
+    }
+
+    .table th {
+        background-color: #f0f0f0 !important;
+        font-weight: bold !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* Badges e cores */
     .badge {
         border: 1px solid #000 !important;
+        color: #000 !important;
+        background-color: #f8f9fa !important;
         -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        display: inline !important;
+        visibility: visible !important;
     }
 
+    /* Timeline */
     .timeline-item {
         page-break-inside: avoid;
+        margin-bottom: 10px !important;
+        display: block !important;
+        visibility: visible !important;
     }
 
+    /* Cores de texto específicas para impressão */
+    .text-success,
+    .text-danger,
+    .text-warning,
+    .text-primary,
+    .text-info {
+        color: #000 !important;
+    }
+
+    /* Ajustar fonte geral */
     body {
-        font-size: 12px;
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        color: #000 !important;
     }
 
+    /* Cabeçalhos */
     h1, h2, h3, h4, h5, h6 {
         color: #000 !important;
+        page-break-after: avoid !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Parágrafos e textos */
+    p, div, span, strong, small {
+        display: block !important;
+        visibility: visible !important;
+        color: #000 !important;
+    }
+
+    /* Elementos inline */
+    span, small, strong, em, i {
+        display: inline !important;
+    }
+
+    /* Quebras de página */
+    .card:not(:first-child) {
+        page-break-before: avoid !important;
+    }
+
+    /* Primeira página - garantir conteúdo */
+    .card:first-child {
+        margin-top: 0 !important;
+        page-break-before: avoid !important;
+    }
+
+    /* Garantir borda nos cards para impressão */
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+    }
+
+    /* Ajustar margens da página */
+    @page {
+        margin: 1.5cm 1cm 1.5cm 1cm;
+        size: A4;
+    }
+
+    /* Remover qualquer espaçamento que possa causar página em branco */
+    body, html {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .container-fluid .row .col-12 .card:first-child {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
     }
 }
 
@@ -422,6 +609,21 @@
 .timeline-item-current .timeline-content {
     border-left-color: #28a745;
     background-color: #f8fff9;
+}
+
+@media print {
+    .timeline-marker {
+        background-color: #000 !important;
+        color: #fff !important;
+        border: 1px solid #000 !important;
+    }
+
+    .timeline-content {
+        background-color: #f8f9fa !important;
+        border-left: 3px solid #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 }
 </style>
 @endpush

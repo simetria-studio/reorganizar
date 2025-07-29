@@ -7,8 +7,6 @@
         @page {
             margin: 0;
             size: A4 landscape;
-            width: 297mm;
-            height: 210mm;
         }
 
         * {
@@ -18,611 +16,334 @@
         }
 
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            background: #ffffff;
-            position: relative;
+            font-family: 'Arial', sans-serif;
+            background: white;
             width: 297mm;
             height: 210mm;
             overflow: hidden;
-            color: #1a1a1a;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10mm;
         }
 
-        /* Background decorativo */
-        .certificate-bg {
+        /* Container principal - pode usar flexbox com Browsershot */
+        .certificate-content {
+            position: relative;
+            width: 277mm;
+            height: 190mm;
+            display: inline-block;
+            background: white;
+        }
+
+        /* Borda principal */
+        .certificate-border {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
-            z-index: 0;
+            border: 12mm solid #1e40af;
+            box-sizing: border-box;
+            background: white;
         }
 
-        /* Borda principal ornamentada */
-        .certificate-border {
+        .certificate-border::before {
+            content: '';
             position: absolute;
             top: 6mm;
             left: 6mm;
             right: 6mm;
             bottom: 6mm;
-            border: 3mm solid #004AAD;
-            border-radius: 4mm;
-            z-index: 1;
-            background: white;
-            box-shadow: inset 0 0 0 1mm #C82222;
+            border: 2mm solid #1e40af;
         }
 
-        /* Borda interna decorativa */
-        .inner-border {
+        /* Círculos decorativos nos cantos */
+        .decorative-circles {
             position: absolute;
-            top: 12mm;
-            left: 12mm;
-            right: 12mm;
-            bottom: 12mm;
-            border: 0.5mm solid #004AAD;
-            border-radius: 2mm;
+            width: 6mm;
+            height: 6mm;
+            background: #1e40af;
+            border-radius: 50%;
             z-index: 2;
-            opacity: 0.7;
         }
 
-        /* Elementos decorativos nos cantos */
-        .corner-decoration {
+        .circle-top-left { top: 18mm; left: 18mm; }
+        .circle-top-right { top: 18mm; right: 18mm; }
+        .circle-bottom-left { bottom: 18mm; left: 18mm; }
+        .circle-bottom-right { bottom: 18mm; right: 18mm; }
+
+        /* Padrões decorativos horizontais */
+        .decorative-pattern {
             position: absolute;
-            width: 12mm;
-            height: 12mm;
-            z-index: 3;
+            top: 22mm;
+            left: 36mm;
+            right: 36mm;
+            height: 7mm;
+            background: linear-gradient(90deg,
+                #1e40af 0%, transparent 20%, #1e40af 40%, transparent 60%, #1e40af 80%, transparent 100%);
+            opacity: 0.3;
+            z-index: 2;
         }
 
-        .corner-decoration::before {
-            content: '';
+        .decorative-pattern-bottom {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, #004AAD 0%, #0056d6 70%, transparent 70%);
-            border-radius: 50%;
+            bottom: 22mm;
+            left: 36mm;
+            right: 36mm;
+            height: 7mm;
+            background: linear-gradient(90deg,
+                #1e40af 0%, transparent 20%, #1e40af 40%, transparent 60%, #1e40af 80%, transparent 100%);
+            opacity: 0.3;
+            z-index: 2;
         }
 
-        .corner-decoration::after {
-            content: '';
+        /* Brasão do Brasil */
+        .brasao {
             position: absolute;
-            top: 2mm;
-            left: 2mm;
-            width: 8mm;
-            height: 8mm;
-            background: radial-gradient(circle, #C82222 0%, #e63946 70%, transparent 70%);
-            border-radius: 50%;
-        }
-
-        .corner-tl { top: 15mm; left: 15mm; }
-        .corner-tr { top: 15mm; right: 15mm; }
-        .corner-bl { bottom: 15mm; left: 15mm; }
-        .corner-br { bottom: 15mm; right: 15mm; }
-
-        /* Brasão central */
-        .brasao-container {
-            position: absolute;
-            top: 18mm;
+            top: 35mm;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 4;
-        }
-
-        .brasao {
-            width: 14mm;
-            height: 16mm;
-            background: linear-gradient(135deg, #004AAD 0%, #0056d6 50%, #003d9a 100%);
-            border-radius: 2mm;
+            width: 12mm;
+            height: 12mm;
+            background: radial-gradient(circle, #1e40af 0%, #1d4ed8 50%, #1e3a8a 100%);
+            border-radius: 50%;
             border: 1mm solid #ffffff;
-            box-shadow: 0 2mm 4mm rgba(0,0,0,0.3);
+            box-shadow: 0 1mm 3mm rgba(0,0,0,0.3);
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             color: white;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .brasao::before {
-            content: '';
-            position: absolute;
-            top: -2mm;
-            left: -2mm;
-            right: -2mm;
-            bottom: -2mm;
-            background: linear-gradient(45deg, #C82222, transparent, #C82222);
-            border-radius: 3mm;
-            z-index: -1;
-            opacity: 0.3;
-        }
-
-        .brasao-text {
-            font-size: 1.6mm;
             font-weight: bold;
-            line-height: 0.9;
-            text-shadow: 0 0.5mm 1mm rgba(0,0,0,0.5);
+            font-size: 1.6mm;
+            text-align: center;
+            line-height: 1.1;
+            z-index: 3;
         }
 
-        /* Container principal do conteúdo */
-        .certificate-content {
-            position: absolute;
-            z-index: 5;
-            top: 32mm;
-            left: 18mm;
-            right: 18mm;
-            bottom: 10mm;
-            height: calc(210mm - 42mm);
-            max-height: 168mm;
+        /* Conteúdo principal - usando flexbox moderno */
+        .cert-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 40mm 45mm 30mm;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
+            justify-content: center;
+            z-index: 3;
         }
 
-        /* Cabeçalho oficial */
+        /* Cabeçalho */
         .header {
             text-align: center;
             margin-bottom: 3mm;
         }
 
         .header h1 {
-            font-size: 4mm;
+            font-size: 3mm;
             font-weight: bold;
-            color: #004AAD;
-            margin: 0.3mm 0;
-            letter-spacing: 0.3mm;
-            text-transform: uppercase;
-            line-height: 1;
-        }
-
-        .header .republic {
-            font-size: 4.2mm;
-            color: #C82222;
-            text-shadow: 0 0.2mm 0.5mm rgba(0,0,0,0.1);
+            margin: 0.5mm 0;
+            color: #1e40af;
+            line-height: 1.2;
         }
 
         /* Informações da escola */
-        .school-section {
+        .school-info {
             text-align: center;
             margin-bottom: 2.5mm;
-            background: rgba(0, 74, 173, 0.05);
-            padding: 2.5mm;
-            border-radius: 2mm;
-            border-left: 3mm solid #004AAD;
+            font-size: 2.4mm;
+            line-height: 1.3;
         }
 
-        .school-info {
-            font-size: 3mm;
-            line-height: 1;
-            margin-bottom: 1mm;
-        }
-
-        .school-info strong {
-            color: #004AAD;
-            font-size: 3.2mm;
-        }
-
+        /* CNPJ e INEP */
         .cnpj-inep {
-            font-size: 2.8mm;
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 1mm;
-        }
-
-        .authorization {
-            font-size: 2.5mm;
-            color: #444;
-            font-style: italic;
-        }
-
-        /* Título principal do certificado */
-        .certificate-title {
             text-align: center;
-            margin: 3mm 0;
-            position: relative;
-        }
-
-        .certificate-title h1 {
-            font-size: 5.5mm;
+            margin-bottom: 1.5mm;
+            font-size: 2.4mm;
             font-weight: bold;
-            color: #C82222;
-            text-transform: uppercase;
-            letter-spacing: 0.3mm;
-            margin: 0;
-            padding: 2.5mm;
-            background: linear-gradient(135deg, rgba(0, 74, 173, 0.1) 0%, rgba(200, 34, 34, 0.1) 100%);
-            border-radius: 2mm;
-            border: 1.5mm solid #004AAD;
-            text-shadow: 0 0.5mm 1mm rgba(0,0,0,0.1);
-            line-height: 1.1;
         }
 
-        /* Conteúdo principal */
-        .main-content {
+        /* Autorização */
+        .authorization {
+            text-align: center;
+            margin-bottom: 3mm;
+            font-size: 2mm;
+        }
+
+        /* Título do certificado */
+        .title {
+            text-align: center;
+            margin: 3mm 0 4mm;
+            border-bottom: 0.8mm solid #1e40af;
+            padding-bottom: 1.5mm;
+        }
+
+        .title h1 {
+            font-size: 4mm;
+            font-weight: bold;
+            color: #1e40af;
+            text-transform: uppercase;
+            letter-spacing: 0.2mm;
+            margin: 0;
+        }
+
+        /* Conteúdo principal - flexível */
+        .content {
+            text-align: justify;
+            margin: 3mm 0;
+            line-height: 1.3;
+            font-size: 2.6mm;
             flex: 1;
             display: flex;
-            flex-direction: column;
-            justify-content: space-around;
+            align-items: center;
         }
 
-        .content-text {
-            text-align: justify;
-            font-size: 3.3mm;
-            line-height: 1.2;
-            margin: 2mm 0;
-            text-indent: 6mm;
-            color: #1a1a1a;
+        .content p {
+            margin: 0;
+            text-indent: 5mm;
         }
 
+        /* Nome do estudante */
         .student-name {
             font-weight: bold;
-            color: #C82222;
-            text-transform: uppercase;
-            font-size: 3.6mm;
+            color: #1e40af;
             text-decoration: underline;
-            text-decoration-color: #004AAD;
-            text-underline-offset: 0.3mm;
-        }
-
-        .course-level {
-            font-weight: bold;
-            color: #004AAD;
             text-transform: uppercase;
         }
 
-        .highlight {
+        /* Informações do curso */
+        .course-info {
             font-weight: bold;
-            color: #004AAD;
+            text-transform: uppercase;
         }
 
         /* Local e data */
         .location-date {
             text-align: center;
-            font-size: 3.5mm;
+            margin: 4mm 0 3mm;
+            font-size: 2.6mm;
             font-weight: bold;
-            color: #004AAD;
-            margin: 2.5mm 0;
-            padding: 1.2mm;
-            background: rgba(0, 74, 173, 0.05);
-            border-radius: 2mm;
         }
 
-        /* Seção de assinaturas */
-        .signatures-section {
-            margin-top: 3mm;
-        }
-
+        /* Seção de assinaturas - usando flexbox */
         .signatures {
-            display: table;
-            width: 100%;
-            table-layout: fixed;
-        }
-
-        .signature {
-            display: table-cell;
-            text-align: center;
-            vertical-align: top;
-            width: 33.33%;
-            padding: 0 2mm;
-        }
-
-        .signature-line {
-            width: 25mm;
-            height: 0.3mm;
-            background: #004AAD;
-            margin: 0 auto 1.5mm;
-            position: relative;
-        }
-
-        .signature-line::before {
-            content: '';
-            position: absolute;
-            top: -1mm;
-            left: -2mm;
-            right: -2mm;
-            height: 3mm;
-            background: transparent;
-        }
-
-        .signature-title {
-            font-size: 2.8mm;
-            font-weight: bold;
-            color: #004AAD;
-            text-transform: uppercase;
-            letter-spacing: 0.1mm;
-        }
-
-        .signature-role {
-            font-size: 2.2mm;
-            color: #666;
-            margin-top: 0.3mm;
-        }
-
-        /* Rodapé com código de verificação */
-        .footer {
+            margin-top: 4mm;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 2.5mm;
-            padding-top: 1.5mm;
-            border-top: 0.5mm solid #004AAD;
         }
 
-        .verification-code {
-            font-size: 2.5mm;
-            color: #666;
-            font-family: 'Courier New', monospace;
-        }
-
-        .issue-info {
-            font-size: 2.5mm;
-            color: #666;
-        }
-
-        /* Selo de autenticidade */
-        .authenticity-seal {
-            position: absolute;
-            bottom: 12mm;
-            right: 12mm;
-            width: 12mm;
-            height: 12mm;
-            background: radial-gradient(circle, #004AAD 0%, #0056d6 70%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5mm;
-            font-weight: bold;
+        .signature {
             text-align: center;
-            line-height: 0.9;
-            z-index: 6;
-            box-shadow: 0 1mm 3mm rgba(0,0,0,0.3);
-            border: 0.5mm solid white;
+            flex: 1;
+            margin: 0 2mm;
         }
 
-        /* Elementos decorativos adicionais */
-        .decorative-line {
+        .signature-line {
+            border-bottom: 0.3mm solid #000;
+            width: 30mm;
+            margin: 0 auto 1.5mm;
+            height: 6mm;
+        }
+
+        .signature-title {
+            font-size: 2mm;
+            font-weight: bold;
+        }
+
+        /* Código de verificação */
+        .verification-code {
             position: absolute;
-            height: 0.5mm;
-            background: linear-gradient(90deg, transparent 0%, #004AAD 50%, transparent 100%);
-            z-index: 2;
-        }
-
-        .line-top {
-            top: 35mm;
-            left: 22mm;
-            right: 22mm;
-        }
-
-        .line-bottom {
-            bottom: 25mm;
-            left: 22mm;
-            right: 22mm;
-        }
-
-        /* Padrão de fundo sutil */
-        .bg-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.03;
-            background-size: 20mm 20mm;
-            background-image: radial-gradient(circle, #004AAD 1px, transparent 1px);
-            z-index: 1;
+            bottom: 10mm;
+            right: 18mm;
+            font-size: 1.6mm;
+            color: #666;
+            z-index: 4;
         }
     </style>
 </head>
 <body>
-    @php
-        // Função para converter mês numérico para nome em português
-        function getMonthName($monthNumber) {
-            $months = [
-                1 => 'Janeiro', 2 => 'Fevereiro', 3 => 'Março', 4 => 'Abril',
-                5 => 'Maio', 6 => 'Junho', 7 => 'Julho', 8 => 'Agosto',
-                9 => 'Setembro', 10 => 'Outubro', 11 => 'Novembro', 12 => 'Dezembro'
-            ];
-            return $months[$monthNumber] ?? 'Janeiro';
-        }
-
-        // Função para formatar data completa em português
-        function formatDatePt($date) {
-            if (!$date) return '01 de Janeiro de 2000';
-
-            try {
-                // Se for objeto Carbon/DateTime
-                if (is_object($date) && method_exists($date, 'format')) {
-                    $day = $date->format('d');
-                    $month = getMonthName((int)$date->format('n'));
-                    $year = $date->format('Y');
-                    return "$day de $month de $year";
-                }
-
-                // Se for string, converter para timestamp
-                if (is_string($date)) {
-                    $timestamp = strtotime($date);
-                    if ($timestamp === false) return '01 de Janeiro de 2000';
-                    $day = date('d', $timestamp);
-                    $month = getMonthName((int)date('n', $timestamp));
-                    $year = date('Y', $timestamp);
-                    return "$day de $month de $year";
-                }
-
-                // Se for timestamp
-                if (is_numeric($date)) {
-                    $day = date('d', $date);
-                    $month = getMonthName((int)date('n', $date));
-                    $year = date('Y', $date);
-                    return "$day de $month de $year";
-                }
-
-            } catch (Exception $e) {
-                return '01 de Janeiro de 2000';
-            }
-
-            return '01 de Janeiro de 2000';
-        }
-
-        // Função para formatar data e hora
-        function formatDateTimePt($date) {
-            if (!$date) return date('d/m/Y H:i');
-
-            try {
-                // Se for objeto Carbon/DateTime
-                if (is_object($date) && method_exists($date, 'format')) {
-                    return $date->format('d/m/Y H:i');
-                }
-
-                // Se for string
-                if (is_string($date)) {
-                    $timestamp = strtotime($date);
-                    return $timestamp !== false ? date('d/m/Y H:i', $timestamp) : date('d/m/Y H:i');
-                }
-
-                // Se for timestamp
-                if (is_numeric($date)) {
-                    return date('d/m/Y H:i', $date);
-                }
-
-            } catch (Exception $e) {
-                return date('d/m/Y H:i');
-            }
-
-            return date('d/m/Y H:i');
-        }
-    @endphp
-
-    <!-- Background -->
-    <div class="certificate-bg"></div>
-    <div class="bg-pattern"></div>
-
-    <!-- Bordas principais -->
-    <div class="certificate-border"></div>
-    <div class="inner-border"></div>
-
-    <!-- Elementos decorativos nos cantos -->
-    <div class="corner-decoration corner-tl"></div>
-    <div class="corner-decoration corner-tr"></div>
-    <div class="corner-decoration corner-bl"></div>
-    <div class="corner-decoration corner-br"></div>
-
-    <!-- Linhas decorativas -->
-    <div class="decorative-line line-top"></div>
-    <div class="decorative-line line-bottom"></div>
-
-    <!-- Brasão -->
-    <div class="brasao-container">
-        <div class="brasao">
-            <div class="brasao-text">
-                BRASÃO<br>
-                DO<br>
-                BRASIL
-            </div>
-        </div>
-    </div>
-
-    <!-- Selo de autenticidade -->
-    <div class="authenticity-seal">
-        SELO<br>
-        OFICIAL
-    </div>
-
-    <!-- Conteúdo principal -->
     <div class="certificate-content">
-        <div>
+        <!-- Borda decorativa do certificado -->
+        <div class="certificate-border"></div>
+
+        <!-- Círculos decorativos nos cantos -->
+        <div class="decorative-circles circle-top-left"></div>
+        <div class="decorative-circles circle-top-right"></div>
+        <div class="decorative-circles circle-bottom-left"></div>
+        <div class="decorative-circles circle-bottom-right"></div>
+
+        <!-- Padrões decorativos -->
+        <div class="decorative-pattern"></div>
+        <div class="decorative-pattern-bottom"></div>
+
+        <!-- Brasão do Brasil -->
+        <div class="brasao">
+            BRASÃO<br>DO<br>BRASIL
+        </div>
+
+        <div class="cert-content">
             <!-- Cabeçalho oficial -->
             <div class="header">
-                <h1 class="republic">República Federativa do Brasil</h1>
-                <h1>Estado do {{ $certificate->student->school->state ?? 'Piauí' }}</h1>
-                <h1>Secretaria de Estado da Educação</h1>
+                <h1>REPÚBLICA FEDERATIVA DO BRASIL</h1>
+                <h1>ESTADO DO PIAUÍ</h1>
+                <h1>SECRETARIA DE ESTADO DA EDUCAÇÃO</h1>
             </div>
 
-            <!-- Informações da escola -->
-            <div class="school-section">
-                <div class="cnpj-inep">
-                    CNPJ Nº {{ $certificate->student->school->cnpj ?? '08.055.298/0001-49' }}
-                    &nbsp;&nbsp;•&nbsp;&nbsp;
-                    INEP Nº {{ $certificate->student->school->inep ?? '22136703' }}
-                </div>
+            <!-- Informações CNPJ e INEP -->
+            <div class="cnpj-inep">
+                CNPJ N° {{ $school_cnpj ?? '08.055.298/0001-49' }} &nbsp;&nbsp;&nbsp;&nbsp; INEP N° {{ $school_inep ?? '22136703' }}
+            </div>
 
-                <div class="school-info">
-                    <strong>{{ strtoupper($certificate->student->school->name ?? 'Centro Estadual de Tempo Integral Francisca Trindade') }}</strong><br>
-                    <em style="font-size: 2.5mm; color: #666;">Nome do Estabelecimento de Ensino</em><br>
-                    <strong>{{ strtoupper($certificate->student->school->address ?? 'Rua do Arame, S/N – Bairro Santinho – CEP: 64.100-000 – Barras-PI') }}</strong><br>
-                    <em style="font-size: 2.5mm; color: #666;">Endereço</em>
-                </div>
+            <!-- Nome da escola -->
+            <div class="school-info">
+                <strong>{{ $school_name ?? 'CENTRO ESTADUAL DE TEMPO INTEGRAL FRANCISCA TRINDADE' }}</strong><br>
+                <span style="font-size: 2mm;">NOME DO ESTABELECIMENTO DE ENSINO</span><br>
+                <strong>{{ $school_address ?? 'RUA DO ARAME, S/N – BAIRRO SANTINHO – CEP: 64.100-000 – BARRAS-PI' }}</strong><br>
+                <span style="font-size: 2mm;">ENDEREÇO</span>
+            </div>
 
-                <div class="authorization">
-                    Autorização de Funcionamento pela Resolução CEE/PI Nº {{ $certificate->student->school->authorization_number ?? '224/2022' }}
-                    de {{ $certificate->student->school->authorization_date ?? '02/12/2022' }}
-                </div>
+            <!-- Autorização -->
+            <div class="authorization">
+                Autorização de Funcionamento pela resolução CEE/PI N°__ {{ $authorization ?? '224/2022' }} de {{ $authorization_date ?? '02/12/2022' }}
             </div>
 
             <!-- Título do certificado -->
-            <div class="certificate-title">
-                <h1>Certificado de Conclusão do Ensino <span class="course-level">{{ strtoupper($certificate->course_level ?? 'Médio') }}</span></h1>
+            <div class="title">
+                <h1>CERTIFICADO DE CONCLUSÃO DO ENSINO <span class="course-info">{{ $course_level ?? 'MÉDIO' }}</span></h1>
             </div>
-        </div>
 
-        <div class="main-content">
             <!-- Conteúdo principal -->
-            <div class="content-text">
-                A Direção do <span class="highlight">{{ $certificate->student->school->type ?? 'Centro Estadual de Tempo Integral - CETI' }}</span>
-                <strong>{{ strtoupper($certificate->student->school->short_name ?? 'Francisca Trindade') }}</strong>,
-                no uso de suas atribuições legais, confere a
-                <span class="student-name">{{ strtoupper($certificate->student->name ?? 'Nome do Aluno') }}</span>,
-                CPF {{ $certificate->student->cpf ?? '000.000.000-00' }},
-                                                  nascido(a) em {{ formatDatePt($certificate->student->birth_date ?? '2000-01-01') }},
-                natural de <span class="highlight">{{ strtoupper($certificate->student->birth_city ?? 'Barras') }}</span>,
-                Estado {{ strtoupper($certificate->student->birth_state ?? 'do Piauí') }},
-                nacionalidade <span class="highlight">{{ strtoupper($certificate->student->nationality ?? 'brasileira') }}</span>,
-                filho(a) de <span class="highlight">{{ strtoupper($certificate->student->father_name ?? 'Não informado') }}</span>
-                e de <span class="highlight">{{ strtoupper($certificate->student->mother_name ?? 'Não informado') }}</span>,
-                o presente certificado por ter concluído no ano de <span class="highlight">{{ $certificate->completion_year ?? date('Y') }}</span>
-                o Ensino <span class="course-level">{{ strtoupper($certificate->course_level ?? 'Médio') }}</span>,
-                para que possa gozar de todos os direitos e prerrogativas concedidas pelas leis do País.
+            <div class="content">
+                <p>A Direção do {{ $school_type ?? 'Centro Estadual de Tempo Integral - CETI' }} <strong>{{ $school_short_name ?? 'FRANCISCA TRINDADE' }}</strong> no uso de suas atribuições legais confere a <span class="student-name">{{ $student_name ?? 'ALUNO EXEMPLO DA SILVA' }}</span>, CPF {{ $student_cpf ?? '000.000.000-00' }}, nascido (a) em {{ $student_birth_day ?? '30' }} de {{ $student_birth_month ?? 'JULHO' }} de {{ $student_birth_year ?? '2006' }}, natural de {{ $student_birthplace ?? 'BARRAS' }}, Estado de (o) {{ $student_birth_state ?? 'PIAUÍ' }}, nacionalidade {{ $student_nationality ?? 'BRASILEIRA' }}, filho (a) de {{ $student_father ?? 'FRANCISCO DAS CHAGAS FURTADO MACHADO' }} e de {{ $student_mother ?? 'MARIA DA CONCEIÇÃO FERREIRA DA SILVA' }}, o presente certificado por ter concluído no ano {{ $completion_year ?? '2023' }} o Ensino <span class="course-info">{{ $course_level ?? 'MÉDIO' }}</span>, para que possa gozar de todos os direitos e prerrogativas concedidas pelas leis do País.</p>
             </div>
 
             <!-- Local e data -->
             <div class="location-date">
-                {{ strtoupper($certificate->student->school->city ?? 'Barras') }} - {{ strtoupper($certificate->student->school->state ?? 'PI') }},
-                                                  {{ formatDatePt($certificate->issue_date ?? now()) }}.
+                {{ $issue_location ?? 'BARRAS' }} - {{ $issue_state ?? 'PI' }}, {{ $issue_day ?? '08' }} de {{ $issue_month ?? 'FEVEREIRO' }} de {{ $issue_year ?? '2024' }}.
             </div>
-        </div>
 
-        <div>
             <!-- Assinaturas -->
-            <div class="signatures-section">
-                <div class="signatures">
-                    <div class="signature">
-                        <div class="signature-line"></div>
-                        <div class="signature-title">Secretário(a)</div>
-                        <div class="signature-role">Secretaria de Educação</div>
-                    </div>
-                    <div class="signature">
-                        <div class="signature-line"></div>
-                        <div class="signature-title">Diretor(a)</div>
-                        <div class="signature-role">{{ $certificate->student->school->short_name ?? 'Escola' }}</div>
-                    </div>
-                    <div class="signature">
-                        <div class="signature-line"></div>
-                        <div class="signature-title">Concluinte</div>
-                        <div class="signature-role">Portador do Certificado</div>
-                    </div>
+            <div class="signatures">
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <div class="signature-title">SECRETÁRIO(A)</div>
+                </div>
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <div class="signature-title">DIRETOR(A)</div>
+                </div>
+                <div class="signature">
+                    <div class="signature-line"></div>
+                    <div class="signature-title">CONCLUINTE</div>
                 </div>
             </div>
 
-            <!-- Rodapé -->
-            <div class="footer">
-                                                  <div class="issue-info">
-                     Emitido digitalmente em {{ formatDateTimePt($certificate->created_at) }}
-                 </div>
-                <div class="verification-code">
-                    Código de Verificação: {{ $certificate->verification_code ?? 'CERT-' . date('Y') . '-00001' }}
-                </div>
+            <!-- Código de verificação -->
+            <div class="verification-code">
+                Código de verificação: {{ $verification_code ?? 'CERT-' . date('Y') . '-' . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT) }}
             </div>
         </div>
     </div>
