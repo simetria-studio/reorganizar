@@ -11,25 +11,52 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
+// Configuração do Puppeteer baseada no ambiente
+function getPuppeteerConfig() {
+    const config = {
+        headless: 'new',
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--disable-extensions',
+            '--disable-plugins',
+            '--no-first-run',
+            '--no-default-browser-check',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
+        ]
+    };
+
+    // Usar executablePath se definido nas variáveis de ambiente
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+        config.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        console.log('🔧 Usando Chrome customizado:', process.env.PUPPETEER_EXECUTABLE_PATH);
+    }
+
+    return config;
+}
+
 // Rota de saúde
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', message: 'PDF Service is running' });
+    res.json({
+        status: 'OK',
+        message: 'PDF Service is running',
+        chrome_path: process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect',
+        node_env: process.env.NODE_ENV || 'development'
+    });
 });
 
 // Teste muito básico - só inicializar Puppeteer
 app.post('/test-puppeteer', async (req, res) => {
     try {
         console.log('🧪 Testing Puppeteer initialization...');
+        console.log('🔧 Chrome path:', process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect');
 
-        const browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu'
-            ]
-        });
+        const config = getPuppeteerConfig();
+        const browser = await puppeteer.launch(config);
 
         console.log('✅ Puppeteer browser launched successfully');
         await browser.close();
@@ -38,7 +65,13 @@ app.post('/test-puppeteer', async (req, res) => {
         res.json({
             success: true,
             message: 'Puppeteer is working correctly',
-            version: require('puppeteer/package.json').version
+            version: require('puppeteer/package.json').version,
+            chrome_path: process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect',
+            config: {
+                headless: config.headless,
+                args_count: config.args.length,
+                has_executable_path: !!config.executablePath
+            }
         });
 
     } catch (error) {
@@ -47,7 +80,8 @@ app.post('/test-puppeteer', async (req, res) => {
             success: false,
             error: 'Puppeteer failed to initialize',
             message: error.message,
-            suggestion: 'Try: npm install puppeteer --force'
+            chrome_path: process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect',
+            suggestion: 'Try: npm install puppeteer --force or check Chrome installation'
         });
     }
 });
@@ -82,22 +116,15 @@ app.post('/test-pdf', async (req, res) => {
         <h1>TESTE DE PDF FUNCIONANDO!</h1>
         <p>Este é um teste simples para verificar se o Puppeteer está gerando PDFs corretamente.</p>
         <p>Data: ${new Date().toLocaleString('pt-BR')}</p>
+        <p>Chrome: ${process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect'}</p>
+        <p>Ambiente: ${process.env.NODE_ENV || 'development'}</p>
     </div>
 </body>
 </html>`;
 
         console.log('🚀 Launching Puppeteer browser...');
-        const browser = await puppeteer.launch({
-            headless: 'new',
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--disable-extensions',
-                '--disable-plugins'
-            ]
-        });
+        const config = getPuppeteerConfig();
+        const browser = await puppeteer.launch(config);
 
         console.log('📄 Creating new page...');
         const page = await browser.newPage();
@@ -126,7 +153,8 @@ app.post('/test-pdf', async (req, res) => {
             success: true,
             pdf: pdfBase64,
             message: 'Test PDF generated successfully',
-            size: pdfBuffer.length
+            size: pdfBuffer.length,
+            chrome_path: process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect'
         });
 
     } catch (error) {
@@ -137,6 +165,7 @@ app.post('/test-pdf', async (req, res) => {
             success: false,
             error: 'Failed to generate test PDF',
             message: error.message,
+            chrome_path: process.env.PUPPETEER_EXECUTABLE_PATH || 'auto-detect',
             details: process.env.NODE_ENV === 'development' ? error.stack : 'Check server logs for details'
         });
     }
